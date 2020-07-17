@@ -20,10 +20,7 @@ sealed trait Option[+A] {
   }
 
   def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = {
-      val c_a:A = a.getOrElse(None)
-      val c_b:B = b.getOrElse(None)
-      if(c_a == None || c_b == None) None
-      Some(f(c_a,c_b))
+      a flatMap (aa => b map (bb => f(aa,bb)))
   }
 }
 
@@ -47,5 +44,9 @@ object Option {
   def sequence[A](a: List[Option[A]]): Option[List[A]] = a match {
     case Nil => Some(Nil)
     case h::t => h flatMap (hh => sequence(t) map(hh::_))
+  }
+  def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
+    case Nil => Some(Nil)
+    case h :: t => f(h) flatMap (hh => traverse(t)(f) map (hh :: _))
   }
 }
